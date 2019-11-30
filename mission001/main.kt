@@ -3,9 +3,29 @@ import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
-    var humanReadableChars = grepHumanReadable(args[0])
 
-    traverseIn16byteChunks(humanReadableChars)
+
+    var grepAsciiPrintable = grepAsciiPrintable(args[0])
+
+    var chunkTo16BytesThatMatch = chunkTo16BytesThatMatch(grepAsciiPrintable)
+
+    chunkTo16BytesThatMatch.forEach{
+        println(String(it.toCharArray()))
+    }
+
+
+//    var humanReadableChars =
+//            grepHumanReadable(args[0])
+//                    .filter {
+//                        """[a-zA-Z ]*""".toRegex().matches( String(listOf(it).toCharArray()))
+//                    }
+//                    .filter {
+//                        """\p{IsHan}""".toRegex().matches( String(listOf(it).toCharArray())) ||
+//                                it.equals(' ')
+//                     }
+
+
+//    traverseIn16byteChunks(humanReadableChars)
 
 //findDividers()
 //grepAscii(args[0])
@@ -13,7 +33,15 @@ fun main(args: Array<String>) {
 // findPattern(args[0])
 }
 
-// TODO currently skips numbers and spaces
+fun chunkTo16BytesThatMatch(chars: List<Char>): List<List<Char>> {
+    return chars.chunked(16)
+            .map { String(it.toCharArray()).toLowerCase() }
+            .map { it.toCharArray().toList() }
+            .filter { it.toSet().size == 16 }
+}
+
+
+// currently skips numbers is wanted
 fun traverseIn16byteChunks(humanReadableChars: List<Char>) {
 
     var iterationIndex = 0
@@ -27,16 +55,25 @@ fun traverseIn16byteChunks(humanReadableChars: List<Char>) {
             val nextCharToAdd = humanReadableChars.get(nextCharIndex++)
 
             // Do not add if that char is already there
-            if (!collectedChars.contains(nextCharToAdd)) {
+            if (!collectedChars.contains(nextCharToAdd) ) {
                 collectedChars.add(nextCharToAdd)
                 asString = String(collectedChars.toCharArray())
             }
         }
 
-        if (asString.toByteArray().size == 16)
+        if (asString.toByteArray().size == 16 && """^[A-Z]+.*""".toRegex().matches(asString))
             println(asString)
     }
 
+}
+
+fun grepAsciiPrintable(file: String): List<Char> {
+    var filter: List<Char> = File(file).readText(Charsets.US_ASCII)
+            .toCharArray()
+            .filter { it.toInt() in 32..127 }
+//            .filter { it.toInt() in 65..90 || it.toInt() in 97..122 || it.toInt() == 32 }
+
+    return filter
 }
 
 fun grepHumanReadable(file: String): List<Char> {
@@ -96,8 +133,6 @@ fun grepAscii(file: String) {
 //            }
             .toList()
 
-    print(
-            String(l.toByteArray(), Charsets.UTF_8))
 }
 
 
@@ -114,13 +149,11 @@ fun findDividers() {
 fun asPositiveNumbers(filename: String) {
     File(filename).readBytes()
             .map {
-                if (it >= 0)
-                    it
-                else
-                    256 - it
+                if (it < 0) it.toInt() + 256
+                else it.toInt()
             }
             .forEach {
-                print(" ")
+                println(it)
             }
 
 }
