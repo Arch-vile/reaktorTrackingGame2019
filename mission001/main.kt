@@ -1,46 +1,47 @@
-import sun.util.resources.hr.CalendarData_hr
 import java.io.File
-import java.lang.IllegalArgumentException
 import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
+
+    println("Please give the original base64 coded signal as input")
     // TODO maybe we should allow e.g. multiple space on word
-    filterAgainstRule(
-            chunkCombinations(
-                    removeChars(
+    toCharList(
+            filterAgainstRule(
+                    chunkCombinations(
+//                    replaceChars(
                             readfile(args)
+//                    )
                     )
-            )
-    )
-            .forEach { println(asString(it)) }
-
+            ))
+                    .forEach { println(String(it.toCharArray()) ) }
+println("Please base64 decode above")
 }
 
-fun removeChars(chars: List<Char>)
-    = chars.filter {
-    
-    it.toByte() >= 32
-}
+fun toCharList(intList: List<List<Int>>): List<List<Char>> =
+    intList.map { it.map { asInt -> asInt.toChar() }}
 
-fun replaceChars(chars: List<Char>) =
-        chars.map { if (it.toByte() < 32) ' ' else it }
+fun removeChars(chars: List<Int>)
+    = chars.filter { it >= 32 }
 
-private fun readfile(args: Array<String>): List<Char> {
+fun replaceChars(chars: List<Int>) =
+        chars.map { if (it < 32) 32 else it }
+
+private fun readfile(args: Array<String>): List<Int> {
     return File(args[0])
-            .readText(Charsets.US_ASCII)
-            .toCharArray()
+            .readBytes()
             .toList()
+            .map { if (it.toInt() < 0) it.toInt() + 255 else it.toInt()  }
 }
 
-fun asString(it: List<Char>) = String(it.toCharArray())
+fun asString(byteList: List<Int>) = byteList.joinToString(",")
 
-fun filterAgainstRule(chunks: List<List<Char>>) =
-        chunks.filter { it.toSet().size == 16 - it.filter { char -> char.equals(' ') }.size   }
-//chunks.filter { it.toSet().size == 16 }
+fun filterAgainstRule(chunks: List<List<Int>>) =
+//        chunks.filter { it.toSet().size == 16 - it.filter { char -> char.equals(' ') }.size   }
+    chunks.filter { it.toSet().size == 16 }
 
-fun chunkCombinations(text: List<Char>): List<List<Char>> {
-    var wordList = mutableListOf<List<Char>>()
+fun chunkCombinations(text: List<Int>): List<List<Int>> {
+    var wordList = mutableListOf<List<Int>>()
     for (startIndex in 0..text.size - 16) {
         wordList.add(text.subList(startIndex, startIndex + 16))
     }
