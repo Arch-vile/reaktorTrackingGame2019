@@ -1,8 +1,18 @@
 import java.io.File
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
+
+    var bytes = File(args[0]).readBytes().toList()
+    bytes
+            .mapIndexed { i, _ -> bytes.subList(i, min(i+16, bytes.size)) }
+            .filter { it.toSet().size == 16 }
+            .forEach { println(String(it.toByteArray())) }
+
+return
 
     println("Please give the original base64 coded signal as input")
     // TODO maybe we should allow e.g. multiple space on word
@@ -17,6 +27,7 @@ fun main(args: Array<String>) {
                     .forEach { println(String(it.toCharArray()) ) }
 println("Please base64 decode above")
 }
+
 
 fun toCharList(intList: List<List<Int>>): List<List<Char>> =
     intList.map { it.map { asInt -> asInt.toChar() }}
@@ -40,7 +51,12 @@ fun filterAgainstRule(chunks: List<List<Int>>) =
 //        chunks.filter { it.toSet().size == 16 - it.filter { char -> char.equals(' ') }.size   }
     chunks.filter { it.toSet().size == 16 }
 
-fun chunkCombinations(text: List<Int>): List<List<Int>> {
+
+
+fun chunkCombinations(text: List<Int>): List<List<Int>> =
+    text.mapIndexed { index, _ -> text.subList(index, min(index+16, text.size)) }
+
+fun chunkCombinations2(text: List<Int>): List<List<Int>> {
     var wordList = mutableListOf<List<Int>>()
     for (startIndex in 0..text.size - 16) {
         wordList.add(text.subList(startIndex, startIndex + 16))
