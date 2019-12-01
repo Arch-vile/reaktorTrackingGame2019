@@ -3,38 +3,58 @@ import java.io.File
 
 fun main(args: Array<String>) {
     var lines = File(args[0]) .readLines()
-
     var dataLines = lines
             .filter {
-                it.contains('#') ||
-                        it.contains("time") ||
-                        it.contains("\"id\"") ||
-                        it.contains("\"date\"")
+                it.contains('#') || it.contains("\"id\"") || it.contains("contaminants")
             }
 
-    val samples = mutableListOf<Sample>()
-    var currentSample = Sample()
-    for (dataLine in lines) {
+    val samples = mutableListOf<Reading>()
+    var currentReading = Reading()
+    for (dataLine in dataLines) {
 
-        if (dataLine.contains("time")) {
+        println(dataLine)
 
-            if (currentSample.time != -1) {
-                samples.add(currentSample)
-                currentSample = Sample()
-            }
-
-            currentSample.time = """[0-9]+""".toRegex().find(dataLine)?.value?.toInt()!!
+        if (dataLine.contains("contaminants") && !currentReading.contaminants.isEmpty()){
+            samples.add(currentReading)
+            currentReading = Reading()
         }
+
+        if (dataLine.contains("id") && currentReading.id != null) {
+            samples.add(currentReading)
+            currentReading = Reading()
+        }
+
+        if (dataLine.contains("id")) currentReading.id = dataLine
+
+        if (dataLine.contains('#'))
+            currentReading.contaminants.add(Anomaly(
+                    """\".*\"""".toRegex().find(dataLine)?.value!!,
+                    """: ([0-9]+)""".toRegex().find(dataLine)?.groups!![1]?.value?.toInt()!!
+            ))
+
+//        if (dataLine.contains("id")) {
+//            if (currentReading.id == null)
+//                currentReading.id = dataLine
+//            else
+//                samples.last().id = dataLine
+//        }
     }
-    samples.add(currentSample)
+    samples.add(currentReading)
 
     samples.forEach{println(it)}
 
 
 }
 
-data class Sample(var date: String = "", var time: Int = -1, var id: String = "", var anomalies: List<Anomaly> = listOf())
-data class Anomaly(var color: String = "", var varue: Int = -1)
+data class Reading(var id: String? = null, val contaminants: MutableList<Anomaly> = mutableListOf())
+
+data class Sample(var date: String = "", var time: Int = -1, var id: String = "", var anomalies: MutableList<Anomaly> = mutableListOf()) {
+    fun isComplete(): Boolean {
+        return !date.isBlank() && time != -1 && !id.isBlank() && !anomalies.isEmpty()
+    }
+}
+
+data class Anomaly(var color: String?, var value: Int?)
 
 
 fun readFileToInts(args: Array<String>) =
