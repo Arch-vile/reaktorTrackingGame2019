@@ -12,8 +12,6 @@ fun main(args: Array<String>) {
     var currentReading = Reading()
     for (dataLine in dataLines) {
 
-        println(dataLine)
-
         if (dataLine.contains("contaminants") && !currentReading.contaminants.isEmpty()){
             samples.add(currentReading)
             currentReading = Reading()
@@ -32,16 +30,13 @@ fun main(args: Array<String>) {
                     """: ([0-9]+)""".toRegex().find(dataLine)?.groups!![1]?.value?.toInt()!!
             ))
 
-//        if (dataLine.contains("id")) {
-//            if (currentReading.id == null)
-//                currentReading.id = dataLine
-//            else
-//                samples.last().id = dataLine
-//        }
     }
     samples.add(currentReading)
 
-    samples.forEach{println(it)}
+samples.map {
+    Pair(it.id, it.contaminants.map { c -> c.value }.sumBy { v -> v!! })
+}
+        .forEach{ println("${it.first}\t${it.second}")}
 
 
 }
