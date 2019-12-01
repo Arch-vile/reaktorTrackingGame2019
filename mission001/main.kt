@@ -1,36 +1,60 @@
+import sun.util.resources.hr.CalendarData_hr
 import java.io.File
+import java.lang.IllegalArgumentException
 import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
+    // TODO maybe we should allow e.g. multiple space on word
+    filterAgainstRule(
+            chunkCombinations(
+                    removeChars(
+                            readfile(args)
+                    )
+            )
+    )
+            .forEach { println(asString(it)) }
 
+}
 
-    var grepAsciiPrintable = grepAsciiPrintable(args[0])
+fun removeChars(chars: List<Char>)
+    = chars.filter {
+    
+    it.toByte() >= 32
+}
 
-    var chunkTo16BytesThatMatch = chunkTo16BytesThatMatch(grepAsciiPrintable)
+fun replaceChars(chars: List<Char>) =
+        chars.map { if (it.toByte() < 32) ' ' else it }
 
-    chunkTo16BytesThatMatch.forEach{
-        println(String(it.toCharArray()))
+private fun readfile(args: Array<String>): List<Char> {
+    return File(args[0])
+            .readText(Charsets.US_ASCII)
+            .toCharArray()
+            .toList()
+}
+
+fun asString(it: List<Char>) = String(it.toCharArray())
+
+fun filterAgainstRule(chunks: List<List<Char>>) =
+        chunks.filter { it.toSet().size == 16 - it.filter { char -> char.equals(' ') }.size   }
+//chunks.filter { it.toSet().size == 16 }
+
+fun chunkCombinations(text: List<Char>): List<List<Char>> {
+    var wordList = mutableListOf<List<Char>>()
+    for (startIndex in 0..text.size - 16) {
+        wordList.add(text.subList(startIndex, startIndex + 16))
+    }
+    return wordList
+}
+
+fun traverseInChunks(grepAsciiPrintable: List<Char>) {
+
+    for (startIndex in 0..grepAsciiPrintable.size - 16) {
+        var word = grepAsciiPrintable.subList(startIndex, startIndex + 16)
+        if (word.toSet().size == 16)
+            println(String(word.toCharArray()))
     }
 
-
-//    var humanReadableChars =
-//            grepHumanReadable(args[0])
-//                    .filter {
-//                        """[a-zA-Z ]*""".toRegex().matches( String(listOf(it).toCharArray()))
-//                    }
-//                    .filter {
-//                        """\p{IsHan}""".toRegex().matches( String(listOf(it).toCharArray())) ||
-//                                it.equals(' ')
-//                     }
-
-
-//    traverseIn16byteChunks(humanReadableChars)
-
-//findDividers()
-//grepAscii(args[0])
-//toSymbols(args[0])
-// findPattern(args[0])
 }
 
 fun chunkTo16BytesThatMatch(chars: List<Char>): List<List<Char>> {
@@ -41,7 +65,6 @@ fun chunkTo16BytesThatMatch(chars: List<Char>): List<List<Char>> {
 }
 
 
-// currently skips numbers is wanted
 fun traverseIn16byteChunks(humanReadableChars: List<Char>) {
 
     var iterationIndex = 0
@@ -55,13 +78,13 @@ fun traverseIn16byteChunks(humanReadableChars: List<Char>) {
             val nextCharToAdd = humanReadableChars.get(nextCharIndex++)
 
             // Do not add if that char is already there
-            if (!collectedChars.contains(nextCharToAdd) ) {
+            if (!collectedChars.contains(nextCharToAdd)) {
                 collectedChars.add(nextCharToAdd)
                 asString = String(collectedChars.toCharArray())
             }
         }
 
-        if (asString.toByteArray().size == 16 && """^[A-Z]+.*""".toRegex().matches(asString))
+        if (asString.toByteArray().size == 16)
             println(asString)
     }
 
@@ -70,8 +93,8 @@ fun traverseIn16byteChunks(humanReadableChars: List<Char>) {
 fun grepAsciiPrintable(file: String): List<Char> {
     var filter: List<Char> = File(file).readText(Charsets.US_ASCII)
             .toCharArray()
-            .filter { it.toInt() in 32..127 }
-//            .filter { it.toInt() in 65..90 || it.toInt() in 97..122 || it.toInt() == 32 }
+//            .filter { it.toInt() in 47..57 || it.toInt() in 65..90 || it.toInt() in 97..122 || it.toInt() == 43 }
+            .filter { it.toInt() in 66..90 || it.toInt() in 97..122 || it.toInt() == 32 }
 
     return filter
 }
