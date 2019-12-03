@@ -1,6 +1,9 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Comparator
+import kotlin.math.abs
 import kotlin.math.max
 
 //DEPS com.fasterxml.jackson.core:jackson-core:2.10.1, com.fasterxml.jackson.core:jackson-databind:2.10.1, com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1
@@ -12,9 +15,32 @@ fun main(args: Array<String>) {
                     .registerModule(KotlinModule())
                     .readValue(File(args[0]), FloodData::class.java)
 
-    
+    data.regions.forEach {
+        checkRegion(it)
+    }
+
 
 }
+
+private fun checkRegion(region: Region) {
+    var sorted = region.readings
+            .sortedWith(Comparator { r1, r2 ->
+                toDate(r1).compareTo(toDate(r2))
+            })
+
+    sorted.windowed(2, 1)
+            .forEach {
+                val firstDay = it[0]
+                val secondDay = it[1]
+                val delta = calculatePools(secondDay.reading) - calculatePools(firstDay.reading)
+
+                if (delta > 1000)
+                    println("Region ${region.regionID} delta $delta")
+            }
+}
+
+fun toDate(r1: Reading) =
+    SimpleDateFormat("dd-MMM-yyyy").parse(r1.date)
 
 private fun testPoolFunction(testData: List<Int>, expected: Int) {
     var poolVolume: Int = calculatePools(testData)
