@@ -3,7 +3,6 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Comparator
-import kotlin.math.abs
 import kotlin.math.max
 
 //DEPS com.fasterxml.jackson.core:jackson-core:2.10.1, com.fasterxml.jackson.core:jackson-databind:2.10.1, com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1
@@ -28,19 +27,34 @@ private fun checkRegion(region: Region) {
                 toDate(r1).compareTo(toDate(r2))
             })
 
-    sorted.windowed(2, 1)
-            .forEach {
+    val suspicious = sorted.windowed(2, 1)
+            .map {
                 val firstDay = it[0]
                 val secondDay = it[1]
                 val delta = calculatePools(secondDay.reading) - calculatePools(firstDay.reading)
-
-                if (delta > 1000)
-                    println("Region ${region.regionID} delta $delta")
+                println(delta)
+                Triple(delta, firstDay, secondDay)
             }
+            .filter { it.first > 1000 }
+
+    val numbers = suspicious
+            .map { it.first }
+    println(numbers[0])
+
+//    numbers
+//            .sortedBy { it  }
+//            .forEach { println(it) }
+//            .sortedBy { triple -> triple.first }
+//            .forEach {
+//                val delta = it.first
+//                val firstDay = it.second
+//                val secondDay = it.third
+//                println("Region ${region.regionID} delta $delta first ${firstDay.readingID}  ${firstDay.date}\t second ${secondDay.readingID} ${secondDay.date}")
+//            }
 }
 
 fun toDate(r1: Reading) =
-    SimpleDateFormat("dd-MMM-yyyy").parse(r1.date)
+        SimpleDateFormat("dd-MMM-yyyy").parse(r1.date)
 
 private fun testPoolFunction(testData: List<Int>, expected: Int) {
     var poolVolume: Int = calculatePools(testData)
