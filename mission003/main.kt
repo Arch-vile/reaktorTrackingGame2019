@@ -32,14 +32,15 @@ private fun checkRegion(region: Region) {
                 val firstDay = it[0]
                 val secondDay = it[1]
                 val delta = calculatePools(secondDay.reading) - calculatePools(firstDay.reading)
-                println(delta)
-                Triple(delta, firstDay, secondDay)
+                var triple = Triple(delta, firstDay, secondDay)
+                println(triple)
+                triple
             }
             .filter { it.first > 1000 }
 
-    val numbers = suspicious
-            .map { it.first }
-    println(numbers[0])
+//    val numbers = suspicious
+//            .map { it.first }
+//    println(numbers[0])
 
 //    numbers
 //            .sortedBy { it  }
