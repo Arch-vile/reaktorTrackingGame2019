@@ -1,34 +1,18 @@
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import java.io.File
 import kotlin.math.max
 
 //DEPS com.fasterxml.jackson.core:jackson-core:2.10.1, com.fasterxml.jackson.core:jackson-databind:2.10.1, com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1
 
 fun main(args: Array<String>) {
-    testPoolFunction(
-            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4),
-            15)
 
-    testPoolFunction(
-            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 4),
-            32)
+    var data =
+            ObjectMapper()
+                    .registerModule(KotlinModule())
+                    .readValue(File(args[0]), FloodData::class.java)
 
-    // TODO fix this
-    testPoolFunction(
-            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 2),
-            24)
-
-
-    // Missing test: multiple maximums on the data
-    // Missing test: max is first or last value
-
-
-
-    println("All good!!!")
-
-//	var data =
-//			ObjectMapper()
-//					.registerModule(KotlinModule())
-//					.readValue(File(args[0]), FloodData::class.java)
-
+    
 
 }
 
@@ -38,8 +22,6 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
         throw RuntimeException("Wrong volume, got $poolVolume expected $expected")
 }
 
-// TODO: remember to skip the start and end slopes
-// TODO: always towards highest point (from left / right)
 fun calculatePools(data: List<Int>): Int {
     var maxHeight = data.max()
     var indexOfMax = data.indexOfFirst { it == maxHeight }
@@ -74,3 +56,41 @@ data class Reading(
         val date: String,
         val reading: List<Int>
 )
+
+
+fun foo() {
+
+    testPoolFunction(
+            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4),
+            15)
+
+    testPoolFunction(
+            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 4),
+            32)
+
+    testPoolFunction(
+            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 2),
+            24)
+
+    testPoolFunction(
+            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 4, -1, -2, -1, 2, -1, 0),
+            43)
+
+    testPoolFunction(
+            listOf(2, 1, 0, -2, 0, -1, 0, 1, 4, 1, 0, -2, 0, 4, -1, -2, -1, 4, -1, 0),
+            49)
+
+    testPoolFunction(
+            listOf(3, -1, 0, -2, -2, 1, -1, 0),
+            10)
+
+    testPoolFunction(
+            listOf(3, -1, 0, -2, -2, 1, -1, 0).reversed(),
+            10)
+
+    // Missing test: flat
+    testPoolFunction(listOf(0, 0, 0), 0)
+    testPoolFunction(listOf(0, 1, 0), 0)
+    testPoolFunction(listOf(0, 1, 2, 3, 2, 1), 0)
+    testPoolFunction(listOf(0, 1, 2, 2, 2, 3, 5), 0)
+}
