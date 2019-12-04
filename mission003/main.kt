@@ -9,10 +9,6 @@ import kotlin.math.max
 
 fun main(args: Array<String>) {
 
-    runTests()
-    System.exit(1)
-
-
     var data =
             ObjectMapper()
                     .registerModule(KotlinModule())
@@ -60,9 +56,10 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
         throw RuntimeException("Wrong volume, got $poolVolume expected $expected")
 }
 
-fun calculatePools(data: List<Int>): Int {
+fun calculatePools(dataO: List<Int>): Int {
+    val data = listOf(dataO.first()).plus(dataO).plus(dataO.last())
     return data.withIndex()
-            .groupBy({ it.index < data.indexOf(data.max()) }, { it.value })
+            .groupBy({ it.index <= dataO.indexOf(dataO.max()) }, { it.value })
             .map { it.value }.chunked(2)
             .flatMap { listOf(it[0], it[1].reversed()) }
             .map {
