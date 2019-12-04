@@ -56,10 +56,13 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
         throw RuntimeException("Wrong volume, got $poolVolume expected $expected")
 }
 
-fun calculatePools(dataO: List<Int>): Int {
-    val data = listOf(dataO.first()).plus(dataO).plus(dataO.last())
+fun calculatePools(data: List<Int>): Int {
+    val dataM = listOf(data.first()).plus(data).plus(data.last())
+    return calculatePools2(dataM)
+}
+fun calculatePools2(data: List<Int>): Int {
     return data.withIndex()
-            .groupBy({ it.index <= dataO.indexOf(dataO.max()) }, { it.value })
+            .groupBy({ it.index <= data.indexOf(data.max()) }, { it.value })
             .map { it.value }.chunked(2)
             .flatMap { listOf(it[0], it[1].reversed()) }
             .map {
