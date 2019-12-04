@@ -3,12 +3,15 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Comparator
-import kotlin.math.abs
 import kotlin.math.max
 
 //DEPS com.fasterxml.jackson.core:jackson-core:2.10.1, com.fasterxml.jackson.core:jackson-databind:2.10.1, com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1
 
 fun main(args: Array<String>) {
+
+    runTests()
+    System.exit(1)
+
 
     var data =
             ObjectMapper()
@@ -58,22 +61,21 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
 }
 
 fun calculatePools(data: List<Int>): Int {
-    var maxHeight = data.max()
-    var indexOfMax = data.indexOfFirst { it == maxHeight }
-    var leftOfMax = data.subList(0, indexOfMax + 1)
-    var rightOfMax = data.subList(indexOfMax, data.size).reversed()
-    return calculateSection(leftOfMax) + calculateSection(rightOfMax)
+    return data.withIndex()
+            .partition { it.index < data.indexOf(data.max()) }
+            .toList()
+            .mapIndexed { i, side -> if (i == 0) side else side.reversed() }
+            .map { it.map { it.value } }
+            .map {
+                it.fold(
+                        Pair(Int.MIN_VALUE, 0),
+                        { a, v -> max(a.first, v).let { Pair(it, a.second + it - v) } })
+                        .second
+            }
+            .sum()
+
 }
 
-fun calculateSection(data: List<Int>): Int {
-    var sum = 0
-    var currentReferenceHeight = data[0]
-    for (height in data) {
-        currentReferenceHeight = max(currentReferenceHeight, height)
-        sum += currentReferenceHeight - height
-    }
-    return sum
-}
 
 data class FloodData(
         val regions: List<Region>
