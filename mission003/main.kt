@@ -62,10 +62,9 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
 
 fun calculatePools(data: List<Int>): Int {
     return data.withIndex()
-            .partition { it.index < data.indexOf(data.max()) }
-            .toList()
-            .mapIndexed { i, side -> if (i == 0) side else side.reversed() }
-            .map { it.map { it.value } }
+            .groupBy({ it.index < data.indexOf(data.max()) }, { it.value })
+            .map { it.value }.chunked(2)
+            .flatMap { listOf(it[0], it[1].reversed()) }
             .map {
                 it.fold(
                         Pair(Int.MIN_VALUE, 0),
