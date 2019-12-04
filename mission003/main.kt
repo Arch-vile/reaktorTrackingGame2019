@@ -43,7 +43,7 @@ private fun checkRegion(region: Region): List<Pair<Region, Triple<Int, Reading, 
                 val delta = calculatePools(secondDay.reading) - calculatePools(firstDay.reading)
                 Pair(region, Triple(delta, firstDay, secondDay))
             }
-            .filter { abs(it.second.first) > 100 }
+            .filter { abs(it.second.first) > 1000 }
 }
 
 fun toDate(r1: Reading) =
@@ -59,10 +59,8 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
 fun calculatePools(data: List<Int>): Int {
     var maxHeight = data.max()
     var indexOfMax = data.indexOfFirst { it == maxHeight }
-
     var leftOfMax = data.subList(0, indexOfMax + 1)
     var rightOfMax = data.subList(indexOfMax, data.size).reversed()
-
     return calculateSection(leftOfMax) + calculateSection(rightOfMax)
 }
 
