@@ -19,6 +19,7 @@ fun main(args: Array<String>) {
         checkRegion(it)
     }
             .flatten()
+//            .sortedBy { it.second.first }.reversed()
 //            .sortedWith(Comparator { r1, r2 ->
 //                toDate(r1.second.second).compareTo(toDate(r2.second.third))
 //            })
@@ -43,7 +44,7 @@ private fun checkRegion(region: Region): List<Pair<Region, Triple<Int, Reading, 
                 val delta = calculatePools(secondDay.reading) - calculatePools(firstDay.reading)
                 Pair(region, Triple(delta, firstDay, secondDay))
             }
-            .filter { abs(it.second.first) > 1000 }
+            .filter { it.second.first > 1000 }
 }
 
 fun toDate(r1: Reading) =
