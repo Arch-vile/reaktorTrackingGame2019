@@ -15,14 +15,13 @@ fun main(args: Array<String>) {
                     .registerModule(KotlinModule())
                     .readValue(File(args[0]), FloodData::class.java)
 
-
     data.regions.map {
         checkRegion(it)
     }
             .flatten()
-            .sortedWith(Comparator { r1, r2 ->
-                toDate(r1.second.second).compareTo(toDate(r2.second.third))
-            })
+//            .sortedWith(Comparator { r1, r2 ->
+//                toDate(r1.second.second).compareTo(toDate(r2.second.third))
+//            })
             .forEach {
                 val region = it.first
                 val delta = it.second.first
@@ -33,12 +32,11 @@ fun main(args: Array<String>) {
 }
 
 private fun checkRegion(region: Region): List<Pair<Region, Triple<Int, Reading, Reading>>> {
-    var sorted = region.readings
+    return region.readings
             .sortedWith(Comparator { r1, r2 ->
                 toDate(r1).compareTo(toDate(r2))
             })
-
-    return sorted.windowed(2, 1)
+            .windowed(2, 1)
             .map {
                 val firstDay = it[0]
                 val secondDay = it[1]
@@ -46,7 +44,6 @@ private fun checkRegion(region: Region): List<Pair<Region, Triple<Int, Reading, 
                 Pair(region, Triple(delta, firstDay, secondDay))
             }
             .filter { abs(it.second.first) > 100 }
-
 }
 
 fun toDate(r1: Reading) =
