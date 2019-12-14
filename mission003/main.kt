@@ -58,22 +58,21 @@ private fun testPoolFunction(testData: List<Int>, expected: Int) {
 
 fun calculatePools(data: List<Int>): Int {
     val dataM = listOf(data.first()).plus(data).plus(data.last())
-    return calculatePools2(dataM)
+    return calculateFloods(dataM)
 }
-fun calculatePools2(data: List<Int>): Int {
-    return data.withIndex()
-            .groupBy({ it.index <= data.indexOf(data.max()) }, { it.value })
-            .map { it.value }.chunked(2)
-            .flatMap { listOf(it[0], it[1].reversed()) }
-            .map {
-                it.fold(
-                        Pair(Int.MIN_VALUE, 0),
-                        { a, v -> max(a.first, v).let { Pair(it, a.second + it - v) } })
-                        .second
-            }
-            .sum()
 
-}
+fun calculateFloods(data: List<Int>) =
+        data.withIndex()
+                .groupBy({ it.index <= data.indexOf(data.max()) }, { it.value })
+                .map { it.value }.chunked(2)
+                .flatMap { listOf(it[0], it[1].reversed()) }
+                .map {
+                    it.fold(
+                            Pair(Int.MIN_VALUE, 0),
+                            { a, v -> max(a.first, v).let { Pair(it, a.second + it - v) } }
+                    ).second
+                }
+                .sum()
 
 
 data class FloodData(
